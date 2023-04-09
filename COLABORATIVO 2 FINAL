@@ -1,0 +1,1939 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace YA_BASTA
+{
+    class Program
+    {
+        static bool[,] seats = new bool[5, 5];
+        const string filename = "reservas.txt";
+        static void Main(string[] args)
+        {
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.Title = "Inicio de Sesión";
+            string usersFile = "users.txt"; // archivo de usuarios
+            bool isLoggedIn = false;
+
+            Console.WriteLine("Ingrese su nombre de usuario:");
+            string username = Console.ReadLine();
+            Console.WriteLine("Ingrese su contraseña:");
+            string password = Console.ReadLine();
+
+            // Verificar si el usuario existe en el archivo de usuarios
+            if (File.Exists(usersFile))
+            {
+                string[] users = File.ReadAllLines(usersFile);
+                foreach (string user in users)
+                {
+                    string[] userDetails = user.Split(',');
+                    if (userDetails[0] == username && userDetails[1] == password)
+                    {
+                        isLoggedIn = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isLoggedIn)
+            {
+                Console.WriteLine("Inicio de sesión exitoso.");
+            }
+            else
+            {
+                Console.WriteLine("Usuario no encontrado. Por favor, regístrese.");
+                RegisterUser(usersFile);
+            }
+            Console.WriteLine("Determine el medio de seleccion de funcion");
+            Console.Write($"Le gustaria proseguir por medio de peliculas, si desea continuar, presione 1");
+            int x = int.Parse(Console.ReadLine());
+            if (x == 1)
+            {
+                Peliculas();
+            }
+            else
+            {
+                cine();
+            }
+            List<Sala> salas = new List<Sala>();
+            salas.Add(new Sala("Sala 1", "Sucursal A", 10.50, 50));
+            salas.Add(new Sala("Sala 2", "Sucursal A", 12.00, 75));
+            salas.Add(new Sala("Sala 3", "Sucursal B", 9.50, 40));
+            salas.Add(new Sala("Sala 4", "Sucursal B", 11.00, 60));
+
+            // Presentar cartelera e información de sucursales
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Bienvenido a nuestro cine:");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Sucursales disponibles:");
+            Console.ResetColor();
+            var sucursales = salas.GroupBy(s => s.Sucursal).Select(grp => grp.First().Sucursal).ToList();
+            for (int i = 0; i < sucursales.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {sucursales[i]}");
+            }
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write("Seleccione una sucursal para ver las películas disponibles: ");
+            Console.ResetColor();
+            int seleccion = int.Parse(Console.ReadLine()) - 1;
+            var salasSucursal = salas.Where(s => s.Sucursal == sucursales[seleccion]).ToList();
+            Console.WriteLine($"Películas disponibles en {sucursales[seleccion]}:");
+            foreach (var sala in salasSucursal)
+            {
+                Console.WriteLine($"{sala.Nombre} ({sala.Precio:C2} por entrada, capacidad de {sala.Capacidad} personas)");
+            }
+
+            // Reporte de salas organizadas por cantidad de entradas vendidas
+            var salasOrdenadas = salas.OrderByDescending(s => s.EntradasVendidas).ToList();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("Reporte de salas ordenadas por cantidad de entradas vendidas:");
+            Console.ResetColor();
+            foreach (var sala in salasOrdenadas)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"{sala.Nombre}: {sala.EntradasVendidas} entradas vendidas");
+                Console.ResetColor();
+            }
+
+            // Reportar sucursal con el mayor número de ingresos
+            var ingresosPorSucursal = salas.GroupBy(s => s.Sucursal)
+                                          .Select(grp => new
+                                          {
+                                              Sucursal = grp.Key,
+                                              Ingresos = grp.Sum(s => s.Precio * s.EntradasVendidas)
+                                          }).ToList();
+            var sucursalMayorIngreso = ingresosPorSucursal.OrderByDescending(s => s.Ingresos).First();
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine($"La sucursal con el mayor número de ingresos es {sucursalMayorIngreso.Sucursal} " +
+                              $"con un total de {sucursalMayorIngreso.Ingresos:C2}");
+            Console.ResetColor();
+            // Opción para calcular el cambio de dinero
+            Console.ForegroundColor = ConsoleColor.DarkBlue;
+            Console.WriteLine("¿Desea calcular el cambio de dinero para una transacción? (S/N) S = Si.  N = No.");
+            Console.ResetColor();
+            string opcion = Console.ReadLine();
+            if (opcion.ToUpper() == "S")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("Ingrese el valor total de las boletas: ");
+                double totalBoletas = double.Parse(Console.ReadLine());
+                Console.Write("Ingrese la cantidad de dinero entregado: ");
+                double dineroEntregado = double.Parse(Console.ReadLine());
+                double cambio = dineroEntregado - totalBoletas;
+                Console.WriteLine($"El cambio a entregar es de {cambio:C2}");
+            }
+            Console.WriteLine("Gracias por visitar nuestro cine. ¡Que disfrute la película!");
+            Console.ResetColor();
+
+        }
+        static void Peliculas()
+        {
+            Console.WriteLine("Determinación de horarios por medio de peliculas");
+            Console.WriteLine("Elige una pelicula entre las siguientes opciones disponibles");
+            Console.WriteLine(" Pelicula disponible [1]");
+            Console.WriteLine(" Pelicula disponible [2]");
+            Console.WriteLine(" Pelicula disponible [3]");
+            Console.Write($"Determine el numero de sus seleccion [1-3] : ");
+            int opi = int.Parse(Console.ReadLine());
+            Console.WriteLine("\n");
+            switch (opi)
+            {
+                case 1:
+                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                    Console.WriteLine("Información acerca de Pelicula [1]");
+                    Console.WriteLine("Género de la función, Clasificación");
+                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                    int yes = int.Parse(Console.ReadLine());
+                    if (yes == 1)
+                    {
+                        Console.WriteLine("Información pertinente de pelicula [1] en formato 3D");
+                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                        Console.WriteLine("Sucursales con funciones disponibles");
+                        Console.WriteLine("Sucursal con disponibilidad [1]");
+                        Console.WriteLine("Sucursal con disponibilidad [2]");
+                        Console.WriteLine("Sucursal con disponibilidad [3]");
+                        Console.WriteLine("Sucursal con disponibilidad [4]");
+                        Console.Write($"Determine el numero de la sucursal al que le gustaria asistir [1-4] : ");
+                        int opcion = int.Parse(Console.ReadLine());
+                        switch (opcion)
+                        {
+                            case 1:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[1]");
+                                Console.WriteLine(" Horario disponible [1A]");
+                                Console.WriteLine(" Horario disponible [2A]");
+                                Console.WriteLine(" Horario disponible [3A]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choose = int.Parse(Console.ReadLine());
+                                switch (choose)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 2:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[2]");
+                                Console.WriteLine(" Horario disponible [1B]");
+                                Console.WriteLine(" Horario disponible [2B]");
+                                Console.WriteLine(" Horario disponible [3B]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choos = int.Parse(Console.ReadLine());
+                                switch (choos)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 3:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[3]");
+                                Console.WriteLine(" Horario disponible [1C]");
+                                Console.WriteLine(" Horario disponible [2C]");
+                                Console.WriteLine(" Horario disponible [3C]");
+                                Console.WriteLine(" Horario disponible [4C]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choo = int.Parse(Console.ReadLine());
+                                switch (choo)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                    case 4:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 4:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[4]");
+                                Console.WriteLine("Horario disponible [1D]");
+                                Console.WriteLine("Horario disponible [2D]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int cho = int.Parse(Console.ReadLine());
+                                switch (cho)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            default:
+                                Console.WriteLine("OPCION NO DISPOBLE :(");
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Información pertinente de pelicula [1] en formato tradicional");
+                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                        Console.WriteLine("Sucursales con funciones disponibles");
+                        Console.WriteLine("Sucursal con disponibilidad [1]");
+                        Console.WriteLine("Sucursal con disponibilidad [2]");
+                        Console.WriteLine("Sucursal con disponibilidad [3]");
+                        Console.WriteLine("Sucursal con disponibilidad [4]");
+                        Console.WriteLine("Sucursal con disponibilidad [5]");
+                        Console.WriteLine("Sucursal con disponibilidad [6]");
+                        Console.Write($"Determine el numero de la sucursal al que le gustaria asistir [1-6] : ");
+                        int option = int.Parse(Console.ReadLine());
+                        switch (option)
+                        {
+                            case 1:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[1]");
+                                Console.WriteLine(" Horario disponible [1A]");
+                                Console.WriteLine(" Horario disponible [2A]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choose = int.Parse(Console.ReadLine());
+                                switch (choose)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 2:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[2]");
+                                Console.WriteLine(" Horario disponible [1B]");
+                                Console.WriteLine(" Horario disponible [2B]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choosen = int.Parse(Console.ReadLine());
+                                switch (choosen)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 3:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[3]");
+                                Console.WriteLine(" Horario disponible [1C]");
+                                Console.WriteLine(" Horario disponible [2C]");
+                                Console.WriteLine(" Horario disponible [3C]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int chose = int.Parse(Console.ReadLine());
+                                switch (chose)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 4:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[4]");
+                                Console.WriteLine("Horario disponible [1D]");
+                                Console.WriteLine("Horario disponible [2D]");
+                                Console.WriteLine("Horario disponible [3D]");
+                                Console.WriteLine("Horario disponible [4D]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int chosen = int.Parse(Console.ReadLine());
+                                switch (chosen)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                    case 4:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 5:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[5]");
+                                Console.WriteLine("Horario disponible [1E]");
+                                Console.WriteLine("Horario disponible [2E]");
+                                Console.WriteLine("Horario disponible [3E]");
+                                Console.WriteLine("Horario disponible [4E]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int chosem = int.Parse(Console.ReadLine());
+                                switch (chosem)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                    case 4:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 6:
+                                Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[6]");
+                                Console.WriteLine("Le gustaria los horarios verificar los horarios para sala S1?, si es asi, presione 1");
+                                int S1 = int.Parse(Console.ReadLine());
+                                if (S1 == 1)
+                                {
+                                    Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[6] en sala[S1]");
+                                    Console.WriteLine("Horario disponible [1FS1]");
+                                    Console.WriteLine("Horario disponible [2FS1]");
+                                    Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                    int election = int.Parse(Console.ReadLine());
+                                    if (election == 1)
+                                    {
+                                        butacas();
+                                    }
+                                    else
+                                    {
+                                        butacas();
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[6] en sala[S2]");
+                                    Console.WriteLine("Horario disponible [1FS1]");
+                                    Console.WriteLine("Horario disponible [2FS1]");
+                                    Console.WriteLine("Horario disponible [3FS1]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int electione = int.Parse(Console.ReadLine());
+                                    switch (electione)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                    }
+                                }
+                                break;
+                            default:
+                                Console.WriteLine("OPCION NO DISPOBLE :(");
+                                break;
+                        }
+                        break;
+                    }
+                    break;
+                case 2:
+                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                    Console.WriteLine("Información acerca de Pelicula [2]");
+                    Console.WriteLine("Género de la función, Clasificación");
+                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                    int si = int.Parse(Console.ReadLine());
+                    if (si == 1)
+                    {
+                        Console.WriteLine("Información pertinente de pelicula [2] en formato 3D");
+                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                        Console.WriteLine("Sucursales con funciones disponibles");
+                        Console.WriteLine("Sucursal con disponibilidad [1]");
+                        Console.WriteLine("Sucursal con disponibilidad [2]");
+                        Console.WriteLine("Sucursal con disponibilidad [3]");
+                        Console.WriteLine("Sucursal con disponibilidad [4]");
+                        Console.Write($"Determine el numero de la sucursal al que le gustaria asistir [1-4] : ");
+                        int opti = int.Parse(Console.ReadLine());
+                        switch (opti)
+                        {
+                            case 1:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[1]");
+                                Console.WriteLine(" Horario disponible [1A]");
+                                Console.WriteLine(" Horario disponible [2A]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int electione = int.Parse(Console.ReadLine());
+                                switch (electione)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 2:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[2]");
+                                Console.WriteLine(" Horario disponible [1B]");
+                                Console.WriteLine(" Horario disponible [2B]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice2 = int.Parse(Console.ReadLine());
+                                switch (choice2)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 3:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[3]");
+                                Console.WriteLine(" Horario disponible [1C]");
+                                Console.WriteLine(" Horario disponible [2C]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice3 = int.Parse(Console.ReadLine());
+                                switch (choice3)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 4:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[4]");
+                                Console.WriteLine("Horario disponible [1D]");
+                                Console.WriteLine("Horario disponible [2D]");
+                                Console.WriteLine("Horario disponible [3D]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice4 = int.Parse(Console.ReadLine());
+                                switch (choice4)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            default:
+                                Console.WriteLine("OPCION NO DISPOBLE :(");
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Información pertinente de pelicula [2] en formato tradicional");
+                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                        Console.WriteLine("Sucursales con funciones disponibles");
+                        Console.WriteLine("Sucursal con disponibilidad [1]");
+                        Console.WriteLine("Sucursal con disponibilidad [2]");
+                        Console.WriteLine("Sucursal con disponibilidad [3]");
+                        Console.WriteLine("Sucursal con disponibilidad [4]");
+                        Console.WriteLine("Sucursal con disponibilidad [5]");
+                        Console.Write($"Determine el numero de la sucursal al que le gustaria asistir [1-6] : ");
+                        int option = int.Parse(Console.ReadLine());
+                        switch (option)
+                        {
+                            case 1:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[1]");
+                                Console.WriteLine(" Horario disponible [1A]");
+                                Console.WriteLine(" Horario disponible [2A]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice4 = int.Parse(Console.ReadLine());
+                                switch (choice4)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 2:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[2]");
+                                Console.WriteLine(" Horario disponible [1B]");
+                                Console.WriteLine(" Horario disponible [2B]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice5 = int.Parse(Console.ReadLine());
+                                switch (choice5)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 3:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[3]");
+                                Console.WriteLine(" Horario disponible [1C]");
+                                Console.WriteLine(" Horario disponible [2C]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice6 = int.Parse(Console.ReadLine());
+                                switch (choice6)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 4:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[4]");
+                                Console.WriteLine("Horario disponible [1D]");
+                                Console.WriteLine("Horario disponible [2D]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice7 = int.Parse(Console.ReadLine());
+                                switch (choice7)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            case 5:
+                                Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[5]");
+                                Console.WriteLine("Horario disponible [1E]");
+                                Console.WriteLine("Horario disponible [2E]");
+                                Console.WriteLine("Horario disponible [3E]");
+                                Console.Write($"Determine el horario al que quiere asistir");
+                                int choice8 = int.Parse(Console.ReadLine());
+                                switch (choice8)
+                                {
+                                    case 1:
+                                        butacas();
+                                        break;
+                                    case 2:
+                                        butacas();
+                                        break;
+                                    case 3:
+                                        butacas();
+                                        break;
+                                }
+                                break;
+                            default:
+                                Console.WriteLine("OPCION NO DISPOBLE :(");
+                                break;
+                        }
+                    }
+                    break;
+                case 3:
+                    Console.WriteLine("Horarios de Pelicula disponible [3]");
+                    Console.WriteLine("Información acerca de Pelicula [3]");
+                    Console.WriteLine("Género de la función, Clasificación");
+                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                    Console.WriteLine("Sucursal con disponibilidad de horarios: Sucursal [1] ");
+                    Console.WriteLine(" Salas con funciones disponibles: ");
+                    Console.WriteLine(" Sala 1 [S1]");
+                    Console.WriteLine(" Sala 2 [S2]");
+                    int opt = int.Parse(Console.ReadLine());
+                    Console.Write($"Determine el numero de sala al que quiere asistir : ");
+                    switch (opt)
+                    {
+                        case 1:
+                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 1[S1]");
+                            Console.WriteLine("Horario disponible [1A]");
+                            Console.WriteLine("Horario disponible [2A]");
+                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                            int election = int.Parse(Console.ReadLine());
+                            if (election == 1)
+                            {
+                                butacas();
+                            }
+                            else
+                            {
+                                butacas();
+                            }
+                            break;
+                        case 2:
+                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 2 [S2]");
+                            Console.WriteLine("Horario disponible [1B]");
+                            Console.WriteLine("Horario disponible [2B]");
+                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                            int election1 = int.Parse(Console.ReadLine());
+                            if (election1 == 1)
+                            {
+                                butacas();
+                            }
+                            else
+                            {
+                                butacas();
+                            }
+                            break;
+                    }
+                    break;
+                default:
+                    Console.WriteLine("No es una opcion valida");
+                    break;
+            }
+        }
+        static void butacas()
+        {
+            InitializeSeats();
+            LoadReservations();
+            PrintSeats();
+            while (true)
+            {
+                Console.Write("Ingrese la fila que desea reservar (1-5): ");
+                int row = int.Parse(Console.ReadLine()) - 1;
+
+                Console.Write("Ingrese el número de asiento que desea reservar (1-5): ");
+                int seat = int.Parse(Console.ReadLine()) - 1;
+
+                if (ReserveSeat(row, seat))
+                {
+                    Console.WriteLine("Asiento reservado con éxito.");
+                    SaveReservations();
+                    PrintSeats();
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Lo siento, ese asiento ya está reservado o ya has seleccionado un asiento.");
+                }
+            }
+        }
+        static void InitializeSeats()
+        {
+            for (int i = 0; i < seats.GetLength(0); i++)
+            {
+                for (int j = 0; j < seats.GetLength(1); j++)
+                {
+                    seats[i, j] = false;
+                }
+            }
+        }
+        static void LoadReservations()
+        {
+            if (!File.Exists(filename))
+            {
+                return;
+            }
+
+            string[] lines = File.ReadAllLines(filename);
+            for (int i = 0; i < seats.GetLength(0) && i < lines.Length; i++)
+            {
+                string[] rowSeats = lines[i].Split(',');
+                for (int j = 0; j < seats.GetLength(1) && j < rowSeats.Length; j++)
+                {
+                    if (rowSeats[j] == "1")
+                    {
+                        seats[i, j] = true;
+                    }
+                }
+            }
+        }
+        static void SaveReservations()
+        {
+            string[] lines = new string[seats.GetLength(0)];
+            for (int i = 0; i < seats.GetLength(0); i++)
+            {
+                string[] rowSeats = new string[seats.GetLength(1)];
+                for (int j = 0; j < seats.GetLength(1); j++)
+                {
+                    rowSeats[j] = seats[i, j] ? "1" : "0";
+                }
+                lines[i] = string.Join(",", rowSeats);
+            }
+            File.WriteAllLines(filename, lines);
+        }
+        static void PrintSeats()
+        {
+            Console.WriteLine("Butacas disponibles:");
+            for (int i = 0; i < seats.GetLength(0); i++)
+            {
+                for (int j = 0; j < seats.GetLength(1); j++)
+                {
+                    Console.Write(seats[i, j] ? "X " : "- ");
+                }
+                Console.WriteLine();
+            }
+        }
+        static bool ReserveSeat(int row, int seat)
+        {
+            if (seats[row, seat])
+            {
+                return false;
+            }
+            else
+            {
+                seats[row, seat] = true;
+                return true;
+            }
+        }
+        static void cine()
+        {
+            Console.WriteLine("Determinación de horarios por medio de sucursal");
+            Console.WriteLine("Elige una area/zona entre las siguientes opciones disponibles");
+            Console.WriteLine(" zona disponible [1]");
+            Console.WriteLine(" zona disponible [2]");
+            Console.WriteLine(" zona disponible [3]");
+            Console.Write($"Determine el numero de sus seleccion [1-3] : ");
+            int chose = int.Parse(Console.ReadLine());
+            switch (chose)
+            {
+                case 1:
+                    Console.WriteLine("Sucursales disponibles en Zona disponible [1]");
+                    Console.WriteLine(" Sucursal disponible [1]");
+                    Console.WriteLine(" Sucrusal disponible [2]");
+                    Console.WriteLine(" Sucursal disponible [3]");
+                    Console.Write($" Determine el numero de la sucursal al que le gustaria asistir :");
+                    int sucu = int.Parse(Console.ReadLine());
+                    switch (sucu)
+                    {
+                        case 1:
+                            Console.WriteLine("sucursal disponible [1] Zona[1]");
+                            Console.WriteLine("Información pertinente de sucursal [1] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [1] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            Console.WriteLine(" Pelicula disponible [3]");
+                            Console.Write($" Determine el numero de sucursall al que le gustaria asistir");
+                            int determinante = int.Parse(Console.ReadLine());
+                            switch (determinante)
+                            {
+                                case 1:
+                                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                                    Console.WriteLine("Información acerca de Pelicula [1]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int yes = int.Parse(Console.ReadLine());
+                                    if (yes == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[1]");
+                                        Console.WriteLine(" Horario disponible [1A]");
+                                        Console.WriteLine(" Horario disponible [2A]");
+                                        Console.WriteLine(" Horario disponible [3A]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choose = int.Parse(Console.ReadLine());
+                                        switch (choose)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                            case 3:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato tradicional");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[1]");
+                                        Console.WriteLine(" Horario disponible [1A]");
+                                        Console.WriteLine(" Horario disponible [2A]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choose = int.Parse(Console.ReadLine());
+                                        switch (choose)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                        break;
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                                    Console.WriteLine("Información acerca de Pelicula [2]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int si = int.Parse(Console.ReadLine());
+                                    if (si == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [2] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[1]");
+                                        Console.WriteLine(" Horario disponible [1A]");
+                                        Console.WriteLine(" Horario disponible [2A]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int electione = int.Parse(Console.ReadLine());
+                                        switch (electione)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                        break;
+                                    }
+                                    break;
+                                case 3:
+                                    Console.WriteLine("Horarios de Pelicula disponible [3]");
+                                    Console.WriteLine("Información acerca de Pelicula [3]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Sucursal con disponibilidad de horarios: Sucursal [1] ");
+                                    Console.WriteLine(" Salas con funciones disponibles: ");
+                                    Console.WriteLine(" Sala 1 [S1]");
+                                    Console.WriteLine(" Sala 2 [S2]");
+                                    int opt = int.Parse(Console.ReadLine());
+                                    Console.Write($"Determine el numero de sala al que quiere asistir : ");
+                                    switch (opt)
+                                    {
+                                        case 1:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 1[S1]");
+                                            Console.WriteLine("Horario disponible [1A]");
+                                            Console.WriteLine("Horario disponible [2A]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election = int.Parse(Console.ReadLine());
+                                            if (election == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                        case 2:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 2 [S2]");
+                                            Console.WriteLine("Horario disponible [1B]");
+                                            Console.WriteLine("Horario disponible [2B]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election1 = int.Parse(Console.ReadLine());
+                                            if (election1 == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 2:
+                            Console.WriteLine("sucursal disponible [2] Zona[1]");
+                            Console.WriteLine("Información pertinente de sucursal [1] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [2] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            Console.WriteLine(" Pelicula disponible [3]");
+                            int determinant = int.Parse(Console.ReadLine());
+                            switch (determinant)
+                            {
+                                case 1:
+                                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                                    Console.WriteLine("Información acerca de Pelicula [1]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int yes = int.Parse(Console.ReadLine());
+                                    if (yes == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[2]");
+                                        Console.WriteLine(" Horario disponible [1B]");
+                                        Console.WriteLine(" Horario disponible [2B]");
+                                        Console.WriteLine(" Horario disponible [3B]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choos = int.Parse(Console.ReadLine());
+                                        switch (choos)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                            case 3:
+                                                butacas();
+                                                break;
+                                        }
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato tradicional");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[2]");
+                                        Console.WriteLine(" Horario disponible [1B]");
+                                        Console.WriteLine(" Horario disponible [2B]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choosen = int.Parse(Console.ReadLine());
+                                        switch (choosen)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                                    Console.WriteLine("Información acerca de Pelicula [2]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int si = int.Parse(Console.ReadLine());
+                                    if (si == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [2] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[2]");
+                                        Console.WriteLine(" Horario disponible [1B]");
+                                        Console.WriteLine(" Horario disponible [2B]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choice2 = int.Parse(Console.ReadLine());
+                                        switch (choice2)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [2] en formato tradicional");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[2]");
+                                        Console.WriteLine(" Horario disponible [1B]");
+                                        Console.WriteLine(" Horario disponible [2B]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choice5 = int.Parse(Console.ReadLine());
+                                        switch (choice5)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+
+                                    }
+                                    break;
+                                case 3:
+                                    Console.WriteLine("Horarios de Pelicula disponible [3]");
+                                    Console.WriteLine("Información acerca de Pelicula [3]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Horario disponible [1A]");
+                                    Console.WriteLine("Horario disponible [2A]");
+                                    Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                    int election = int.Parse(Console.ReadLine());
+                                    if (election == 1)
+                                    {
+                                        butacas();
+                                    }
+                                    else
+                                    {
+                                        butacas();
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 3:
+                            Console.WriteLine("sucursal disponible [3] Zona[1]");
+                            Console.WriteLine("Información pertinente de sucursal [3] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [3] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            int determinan = int.Parse(Console.ReadLine());
+                            switch (determinan)
+                            {
+                                case 1:
+                                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                                    Console.WriteLine("Información acerca de Pelicula [1]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int yes = int.Parse(Console.ReadLine());
+                                    if (yes == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine(" Horario disponible [1C]");
+                                        Console.WriteLine(" Horario disponible [2C]");
+                                        Console.WriteLine(" Horario disponible [3C]");
+                                        Console.WriteLine(" Horario disponible [4C]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choo = int.Parse(Console.ReadLine());
+                                        switch (choo)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                            case 3:
+                                                butacas();
+                                                break;
+                                            case 4:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato tradicional");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[3]");
+                                        Console.WriteLine(" Horario disponible [1C]");
+                                        Console.WriteLine(" Horario disponible [2C]");
+                                        Console.WriteLine(" Horario disponible [3C]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int chosep = int.Parse(Console.ReadLine());
+                                        switch (chosep)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                            case 3:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                                    Console.WriteLine("Información acerca de Pelicula [2]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int si = int.Parse(Console.ReadLine());
+                                    if (si == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [2] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[3]");
+                                        Console.WriteLine(" Horario disponible [1C]");
+                                        Console.WriteLine(" Horario disponible [2C]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choice3 = int.Parse(Console.ReadLine());
+                                        switch (choice3)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [2] en formato tradicional");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[3]");
+                                        Console.WriteLine(" Horario disponible [1C]");
+                                        Console.WriteLine(" Horario disponible [2C]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choice6 = int.Parse(Console.ReadLine());
+                                        switch (choice6)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    break;
+                            }
+                            break;
+                        default:
+                            Console.WriteLine("OPCION NO DISPONIBLE");
+                            break;
+                    }
+                    break;
+                case 2:
+                    Console.WriteLine("Sucursales disponibles en Zona disponible [2]");
+                    Console.WriteLine(" Sucursal disponible [1]");
+                    Console.WriteLine(" Sucrusal disponible [2]");
+                    Console.WriteLine(" Sucursal disponible [3]");
+                    Console.Write($" Determine el numero de la sucursal al que le gustaria asistir :");
+                    int suc = int.Parse(Console.ReadLine());
+                    switch (suc)
+                    {
+                        case 1:
+                            Console.WriteLine("sucursal disponible [1] Zona[2]");
+                            Console.WriteLine("Información pertinente de sucursal [1] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [1] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            Console.WriteLine(" Pelicula disponible [3]");
+                            int determina = int.Parse(Console.ReadLine());
+                            switch (determina)
+                            {
+                                case 1:
+                                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                                    Console.WriteLine("Información acerca de Pelicula [1]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int yes = int.Parse(Console.ReadLine());
+                                    if (yes == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[4]");
+                                        Console.WriteLine("Horario disponible [1D]");
+                                        Console.WriteLine("Horario disponible [2D]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int cho = int.Parse(Console.ReadLine());
+                                        switch (cho)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[4]");
+                                        Console.WriteLine("Horario disponible [1D]");
+                                        Console.WriteLine("Horario disponible [2D]");
+                                        Console.WriteLine("Horario disponible [3D]");
+                                        Console.WriteLine("Horario disponible [4D]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int chosen = int.Parse(Console.ReadLine());
+                                        switch (chosen)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                            case 3:
+                                                butacas();
+                                                break;
+                                            case 4:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                                    Console.WriteLine("Información acerca de Pelicula [2]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int si = int.Parse(Console.ReadLine());
+                                    if (si == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [2] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[4]");
+                                        Console.WriteLine("Horario disponible [1D]");
+                                        Console.WriteLine("Horario disponible [2D]");
+                                        Console.WriteLine("Horario disponible [3D]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choice4 = int.Parse(Console.ReadLine());
+                                        switch (choice4)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                            case 3:
+                                                butacas();
+                                                break;
+                                        }
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[4]");
+                                        Console.WriteLine("Horario disponible [1D]");
+                                        Console.WriteLine("Horario disponible [2D]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choice7 = int.Parse(Console.ReadLine());
+                                        switch (choice7)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                            case 3:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case 3:
+                                    Console.WriteLine("Horarios de Pelicula disponible [3]");
+                                    Console.WriteLine("Información acerca de Pelicula [3]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine(" Salas con funciones disponibles: ");
+                                    Console.WriteLine(" Sala 1 [S1]");
+                                    Console.WriteLine(" Sala 2 [S2]");
+                                    int opt = int.Parse(Console.ReadLine());
+                                    Console.Write($"Determine el numero de sala al que quiere asistir : ");
+                                    switch (opt)
+                                    {
+                                        case 1:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 1[S1]");
+                                            Console.WriteLine("Horario disponible [1A]");
+                                            Console.WriteLine("Horario disponible [2A]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election = int.Parse(Console.ReadLine());
+                                            if (election == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                        case 2:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 2 [S2]");
+                                            Console.WriteLine("Horario disponible [1B]");
+                                            Console.WriteLine("Horario disponible [2B]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election1 = int.Parse(Console.ReadLine());
+                                            if (election1 == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 2:
+                            Console.WriteLine("sucursal disponible [2] Zona[2]");
+                            Console.WriteLine("Información pertinente de sucursal [1] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [2] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            int determin = int.Parse(Console.ReadLine());
+                            switch (determin)
+                            {
+                                case 1:
+                                    Console.WriteLine("Información pertinente de pelicula [1] en formato tradicional");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[5]");
+                                    Console.WriteLine("Horario disponible [1E]");
+                                    Console.WriteLine("Horario disponible [2E]");
+                                    Console.WriteLine("Horario disponible [3E]");
+                                    Console.WriteLine("Horario disponible [4E]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int chosem = int.Parse(Console.ReadLine());
+                                    switch (chosem)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                        case 3:
+                                            butacas();
+                                            break;
+                                        case 4:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                                    Console.WriteLine("Información acerca de Pelicula [2]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[5]");
+                                    Console.WriteLine("Horario disponible [1E]");
+                                    Console.WriteLine("Horario disponible [2E]");
+                                    Console.WriteLine("Horario disponible [3E]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int choice8 = int.Parse(Console.ReadLine());
+                                    switch (choice8)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                        case 3:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 3:
+                            Console.WriteLine("sucursal disponible [3] Zona[2]");
+                            Console.WriteLine("Información pertinente de sucursal [3] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [3] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            Console.WriteLine(" Pelicula disponible [3]");
+                            int detee = int.Parse(Console.ReadLine());
+                            switch (detee)
+                            {
+                                case 1:
+                                    Console.WriteLine("Información pertinente de pelicula [1] en formato tradicional");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[6]");
+                                    Console.WriteLine("Le gustaria los horarios verificar los horarios para sala S1?, si es asi, presione 1");
+                                    int S1 = int.Parse(Console.ReadLine());
+                                    if (S1 == 1)
+                                    {
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[6] en sala[S1]");
+                                        Console.WriteLine("Horario disponible [1FS1]");
+                                        Console.WriteLine("Horario disponible [2FS1]");
+                                        Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                        int election = int.Parse(Console.ReadLine());
+                                        if (election == 1)
+                                        {
+                                            butacas();
+                                        }
+                                        else
+                                        {
+                                            butacas();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[6] en sala[S2]");
+                                        Console.WriteLine("Horario disponible [1FS1]");
+                                        Console.WriteLine("Horario disponible [2FS1]");
+                                        Console.WriteLine("Horario disponible [3FS1]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int electione = int.Parse(Console.ReadLine());
+                                        switch (electione)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Información pertinente de pelicula [2] en formato tradicional");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[6]");
+                                    Console.WriteLine("Horario disponible [1F]");
+                                    Console.WriteLine("Horario disponible [2F]");
+                                    Console.WriteLine("Horario disponible [3F]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int choice8 = int.Parse(Console.ReadLine());
+                                    switch (choice8)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                        case 3:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                                case 3:
+                                    Console.WriteLine("Horarios de Pelicula disponible [3]");
+                                    Console.WriteLine("Información acerca de Pelicula [3]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Sucursal con disponibilidad de horarios: Sucursal [1] ");
+                                    Console.WriteLine(" Salas con funciones disponibles: ");
+                                    Console.WriteLine(" Sala 1 [S1]");
+                                    Console.WriteLine(" Sala 2 [S2]");
+                                    int opt = int.Parse(Console.ReadLine());
+                                    Console.Write($"Determine el numero de sala al que quiere asistir : ");
+                                    switch (opt)
+                                    {
+                                        case 1:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 1[S1]");
+                                            Console.WriteLine("Horario disponible [1A]");
+                                            Console.WriteLine("Horario disponible [2A]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election = int.Parse(Console.ReadLine());
+                                            if (election == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                        case 2:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 2 [S2]");
+                                            Console.WriteLine("Horario disponible [1B]");
+                                            Console.WriteLine("Horario disponible [2B]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election1 = int.Parse(Console.ReadLine());
+                                            if (election1 == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case 3:
+                    Console.WriteLine("Sucursales disponibles en Zona disponible [3]");
+                    Console.WriteLine(" Sucursal disponible [1]");
+                    Console.WriteLine(" Sucrusal disponible [2]");
+                    Console.WriteLine(" Sucursal disponible [3]");
+                    Console.Write($" Determine el numero de la sucursal al que le gustaria asistir :");
+                    int choice = int.Parse(Console.ReadLine());
+                    switch (choice)
+                    {
+                        case 1:
+                            Console.WriteLine("sucursal disponible [1] Zona[3]");
+                            Console.WriteLine("Información pertinente de sucursal [1] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [1] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            int det = int.Parse(Console.ReadLine());
+                            switch (det)
+                            {
+                                case 1:
+                                    Console.WriteLine("Información pertinente de pelicula [1] en formato 3D");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[5]");
+                                    Console.WriteLine("Horario disponible [1E]");
+                                    Console.WriteLine("Horario disponible [2E]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int cho = int.Parse(Console.ReadLine());
+                                    switch (cho)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                                    Console.WriteLine("Información acerca de Pelicula [2]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Información pertinente de pelicula [2] en formato tradicional");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[7]");
+                                    Console.WriteLine("Horario disponible [1G]");
+                                    Console.WriteLine("Horario disponible [2G]");
+                                    Console.WriteLine("Horario disponible [3G]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int choice8 = int.Parse(Console.ReadLine());
+                                    switch (choice8)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                        case 3:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                            }
+
+                            break;
+                        case 2:
+                            Console.WriteLine("sucursal disponible [2] Zona[3]");
+                            Console.WriteLine("Información pertinente de sucursal [2] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [2] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            int dete = int.Parse(Console.ReadLine());
+                            switch (dete)
+                            {
+                                case 1:
+                                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                                    Console.WriteLine("Información acerca de Pelicula [1]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Sucursal con disponibilidad de horarios: Sucursal [1] ");
+                                    Console.WriteLine(" Salas con funciones disponibles: ");
+                                    Console.WriteLine(" Sala 1 [S1]");
+                                    Console.WriteLine(" Sala 2 [S2]");
+                                    int opt = int.Parse(Console.ReadLine());
+                                    Console.Write($"Determine el numero de sala al que quiere asistir : ");
+                                    switch (opt)
+                                    {
+                                        case 1:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[1] en Sala 1[S1]");
+                                            Console.WriteLine("Horario disponible [1A]");
+                                            Console.WriteLine("Horario disponible [2A]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election = int.Parse(Console.ReadLine());
+                                            if (election == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                        case 2:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[1] en Sala 2 [S2]");
+                                            Console.WriteLine("Horario disponible [1B]");
+                                            Console.WriteLine("Horario disponible [2B]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election1 = int.Parse(Console.ReadLine());
+                                            if (election1 == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Información pertinente de pelicula [2] en formato tradicional");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[8]");
+                                    Console.WriteLine(" Horario disponible [1C]");
+                                    Console.WriteLine(" Horario disponible [2C]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int choice6 = int.Parse(Console.ReadLine());
+                                    switch (choice6)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                            }
+
+                            break;
+                        case 3:
+                            Console.WriteLine("sucursal disponible [3] Zona[3]");
+                            Console.WriteLine("Información pertinente de sucursal [3] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [3] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            Console.WriteLine(" Pelicula disponible [3]");
+                            int determine = int.Parse(Console.ReadLine());
+                            switch (determine)
+                            {
+                                case 1:
+                                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                                    Console.WriteLine("Información acerca de Pelicula [1]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.Write($"Le gustaria que fuera en 3D?, si es asi presione 1");
+                                    int yes = int.Parse(Console.ReadLine());
+                                    if (yes == 1)
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato 3D");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en 3D en Sucursal[4]");
+                                        Console.WriteLine("Horario disponible [1D]");
+                                        Console.WriteLine("Horario disponible [2D]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int cho = int.Parse(Console.ReadLine());
+                                        switch (cho)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Información pertinente de pelicula [1] en formato tradicional");
+                                        Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                        Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                        Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[1]");
+                                        Console.WriteLine(" Horario disponible [1A]");
+                                        Console.WriteLine(" Horario disponible [2A]");
+                                        Console.Write($"Determine el horario al que quiere asistir");
+                                        int choose = int.Parse(Console.ReadLine());
+                                        switch (choose)
+                                        {
+                                            case 1:
+                                                butacas();
+                                                break;
+                                            case 2:
+                                                butacas();
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Horarios de Pelicula disponible [2]");
+                                    Console.WriteLine("Información acerca de Pelicula [2]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Información pertinente de pelicula [2] en formato 3D");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $5.60, Adultos $6.55");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [2] en 3D en Sucursal[1]");
+                                    Console.WriteLine(" Horario disponible [1A]");
+                                    Console.WriteLine(" Horario disponible [2A]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int electione = int.Parse(Console.ReadLine());
+                                    switch (electione)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                                case 3:
+                                    Console.WriteLine("Horarios de Pelicula disponible [3]");
+                                    Console.WriteLine("Información acerca de Pelicula [3]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Sucursal con disponibilidad de horarios: Sucursal [1] ");
+                                    Console.WriteLine(" Salas con funciones disponibles: ");
+                                    Console.WriteLine(" Sala 1 [S1]");
+                                    Console.WriteLine(" Sala 2 [S2]");
+                                    int opt = int.Parse(Console.ReadLine());
+                                    Console.Write($"Determine el numero de sala al que quiere asistir : ");
+                                    switch (opt)
+                                    {
+                                        case 1:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 1[S1]");
+                                            Console.WriteLine("Horario disponible [1A]");
+                                            Console.WriteLine("Horario disponible [2A]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election = int.Parse(Console.ReadLine());
+                                            if (election == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                        case 2:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [3] en Sucursal[1] en Sala 2 [S2]");
+                                            Console.WriteLine("Horario disponible [1B]");
+                                            Console.WriteLine("Horario disponible [2B]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election1 = int.Parse(Console.ReadLine());
+                                            if (election1 == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case 4:
+                            Console.WriteLine("sucursal disponible [4] Zona[3]");
+                            Console.WriteLine("Información pertinente de sucursal [4] ");
+                            Console.WriteLine(" Nombre del gerente, Dirección de la sucursal, Numero de telefono");
+                            Console.WriteLine(" Peliculas disponibles en sucursal [4] : ");
+                            Console.WriteLine(" Pelicula disponible [1]");
+                            Console.WriteLine(" Pelicula disponible [2]");
+                            int dem = int.Parse(Console.ReadLine());
+                            switch (dem)
+                            {
+                                case 1:
+                                    Console.WriteLine("Horarios de Pelicula disponible [1]");
+                                    Console.WriteLine("Información acerca de Pelicula [1]");
+                                    Console.WriteLine("Género de la función, Clasificación");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Sucursal con disponibilidad de horarios: Sucursal [1] ");
+                                    Console.WriteLine(" Salas con funciones disponibles: ");
+                                    Console.WriteLine(" Sala 1 [S1]");
+                                    Console.WriteLine(" Sala 2 [S2]");
+                                    int opt = int.Parse(Console.ReadLine());
+                                    Console.Write($"Determine el numero de sala al que quiere asistir : ");
+                                    switch (opt)
+                                    {
+                                        case 1:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[1] en Sala 1[S1]");
+                                            Console.WriteLine("Horario disponible [1A]");
+                                            Console.WriteLine("Horario disponible [2A]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election = int.Parse(Console.ReadLine());
+                                            if (election == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                        case 2:
+                                            Console.WriteLine("Horarios disponibles para Pelicula [1] en Sucursal[1] en Sala 2 [S2]");
+                                            Console.WriteLine("Horario disponible [1B]");
+                                            Console.WriteLine("Horario disponible [2B]");
+                                            Console.Write($"Determine el horario al que quiere asistir, si quiere horario [1FS1], presione 1");
+                                            int election1 = int.Parse(Console.ReadLine());
+                                            if (election1 == 1)
+                                            {
+                                                butacas();
+                                            }
+                                            else
+                                            {
+                                                butacas();
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case 2:
+                                    Console.WriteLine("Información pertinente de pelicula [2] en formato tradicional");
+                                    Console.WriteLine("Valor de la función de acuerdo con edad del usuario");
+                                    Console.WriteLine("Usuarios de Tercera edad: $3.90, Adultos $5.00");
+                                    Console.WriteLine("Horarios disponibles para Pelicula [2] en Sucursal[8]");
+                                    Console.WriteLine(" Horario disponible [1C]");
+                                    Console.WriteLine(" Horario disponible [2C]");
+                                    Console.Write($"Determine el horario al que quiere asistir");
+                                    int choice6 = int.Parse(Console.ReadLine());
+                                    switch (choice6)
+                                    {
+                                        case 1:
+                                            butacas();
+                                            break;
+                                        case 2:
+                                            butacas();
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+
+            }
+        }
+        static void RegisterUser(string usersFile)
+        {
+            Console.WriteLine("Ingrese su nombre:");
+            string firstName = Console.ReadLine();
+            Console.WriteLine("Ingrese su apellido:");
+            string lastName = Console.ReadLine();
+            Console.WriteLine("Ingrese su correo electrónico:");
+            string email = Console.ReadLine();
+            Console.WriteLine("Ingrese su número de identificación:");
+            string idNumber = Console.ReadLine();
+            Console.WriteLine("Ingrese su número de teléfono:");
+            string phoneNumber = Console.ReadLine();
+
+            Console.WriteLine("Ingrese su nombre de usuario:");
+            string username = Console.ReadLine();
+
+            // Verificar si el usuario ya existe en el archivo de usuarios
+            if (File.Exists(usersFile))
+            {
+                string[] users = File.ReadAllLines(usersFile);
+                foreach (string user in users)
+                {
+                    string[] userDetails = user.Split(',');
+                    if (userDetails[0] == username)
+                    {
+                        Console.WriteLine("El usuario ya existe. Por favor, intente de nuevo.");
+                        RegisterUser(usersFile);
+                        return;
+                    }
+                }
+            }
+
+            Console.WriteLine("Ingrese su contraseña:");
+            string password = Console.ReadLine();
+
+            // Almacenar el nuevo usuario en el archivo de usuarios
+            using (StreamWriter sw = File.AppendText(usersFile))
+            {
+                sw.WriteLine($"{username},{password},{firstName},{lastName},{email},{idNumber},{phoneNumber}");
+            }
+            Console.WriteLine("Registro exitoso. Ingrese sus credenciales para iniciar sesión.");
+
+        }
+        class Sala
+        {
+            public string Nombre { get; set; }
+            public string Sucursal { get; set; }
+            public double Precio { get; set; }
+            public int Capacidad { get; set; }
+            public int EntradasVendidas { get; set; }
+
+            public Sala(string nombre, string sucursal, double precio, int capacidad)
+            {
+                Nombre = nombre;
+                Sucursal = sucursal;
+                Precio = precio;
+                Capacidad = capacidad;
+                EntradasVendidas = 0;
+            }
+        }
+    }
+}
