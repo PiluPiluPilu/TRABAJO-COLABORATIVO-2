@@ -58,6 +58,7 @@ namespace YA_BASTA
             {
                 cine();
             }
+            Ventas();
             // Opción para calcular el cambio de dinero
             Console.ForegroundColor = ConsoleColor.DarkBlue;
             Console.WriteLine("¿Desea calcular el cambio de dinero para una transacción? (S/N) S = Si.  N = No.");
@@ -75,7 +76,6 @@ namespace YA_BASTA
             }
             Console.WriteLine("Gracias por visitar nuestro cine. ¡Que disfrute la película!");
             Console.ResetColor();
-
         }
         static void Peliculas()
         {
@@ -1937,6 +1937,89 @@ namespace YA_BASTA
                     break;
 
             }
+        }
+        static void Ventas()
+        {
+                const double PRECIO_TRADICIONAL_ADULTO = 5.00;
+                const double PRECIO_TRADICIONAL_TERCERA_EDAD = 3.90;
+                const double PRECIO_3D_ADULTO = 6.55;
+                const double PRECIO_3D_TERCERA_EDAD = 5.60;
+
+                string[] ubicaciones = {
+            "San Salvador",
+            "Santa Ana",
+            "San Miguel",
+            "La Libertad",
+            "Chalatenango",
+            "Sonsonate",
+            "La Paz",
+            "Usulután",
+            "Ahuachapán",
+            "Morazán"
+        };
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("Ingrese el número de sucursal (1, 2, 3, 4, 5, 6, 7, 8, 9, 10): ");
+                int sucursal = int.Parse(Console.ReadLine() ?? "");
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("Ingrese el número de sala de cine (1, 2, 3, 4, 5, 6): ");
+                int sala = int.Parse(Console.ReadLine() ?? "");
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("Ingrese el formato de la película (Tradicional o 3D): ");
+                string formato = Console.ReadLine() ?? "";
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("Ingrese la edad del asistente (Adulto o Tercera edad): ");
+                string edad = Console.ReadLine() ?? "";
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("Ingrese la cantidad de entradas compradas: ");
+                int cantidadEntradas = int.Parse(Console.ReadLine() ?? "");
+                Console.ResetColor();
+
+                double precio = 0.0;
+
+                if (formato.ToLower() == "tradicional")
+                {
+                    if (edad.ToLower() == "adulto")
+                    {
+                        precio = PRECIO_TRADICIONAL_ADULTO;
+                    }
+                    else
+                    {
+                        precio = PRECIO_TRADICIONAL_TERCERA_EDAD;
+                    }
+                }
+                else
+                {
+                    if (edad.ToLower() == "adulto")
+                    {
+                        precio = PRECIO_3D_ADULTO;
+                    }
+                    else
+                    {
+                        precio = PRECIO_3D_TERCERA_EDAD;
+                    }
+                }
+                double precioTotal = precio * cantidadEntradas;
+
+                // Generar reporte
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\nSucursal: {sucursal}");
+                Console.WriteLine($"Ubicación: {ubicaciones[sucursal - 1]}");
+                Console.WriteLine($"Sala de cine: {sala}");
+                Console.WriteLine($"Formato: {formato}");
+                Console.WriteLine($"Edad: {edad}");
+                Console.WriteLine($"Cantidad de entradas: {cantidadEntradas}");
+                Console.WriteLine($"Precio de la función: ${precio:F2}");
+                Console.WriteLine($"Precio total: ${precioTotal:F2}");
+                Console.ResetColor();
         }
         static void RegisterUser(string usersFile)
         {
